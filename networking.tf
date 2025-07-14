@@ -1,32 +1,34 @@
+locals {
+  common_tags = {
+    ManagedBy  = "Terraform"
+    Project    = "ec2-vpc"
+    CostCenter = "1234"
+  }
+}
+
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
 
-  tags = {
-    Name      = "ec2-vpc"
-    ManagedBy = "Terraform"
-    Project   = "ec2-vpc"
-  }
+  tags = merge(local.common_tags, {
+    Name = "ec2-vpc"
+  })
 }
 
 resource "aws_subnet" "public" {
   vpc_id     = aws_vpc.main.id
   cidr_block = "10.0.0.0/24"
 
-  tags = {
-    Name      = "ec2-vpc-public"
-    ManagedBy = "Terraform"
-    Project   = "ec2-vpc"
-  }
+  tags = merge(local.common_tags, {
+    Name = "ec2-vpc-public"
+  })
 }
 
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
-  tags = {
-    Name      = "ec2-vpc"
-    ManagedBy = "Terraform"
-    Project   = "ec2-vpc"
-  }
+  tags = merge(local.common_tags, {
+    Name = "ec2-vpc-main"
+  })
 }
 
 resource "aws_route_table" "public" {
@@ -36,11 +38,9 @@ resource "aws_route_table" "public" {
     gateway_id = aws_internet_gateway.main.id
   }
 
-  tags = {
-    Name      = "ec2-vpc"
-    ManagedBy = "Terraform"
-    Project   = "ec2-vpc"
-  }
+  tags = merge(local.common_tags, {
+    Name = "ec2-vpc-main"
+  })
 }
 
 resource "aws_route_table_association" "public" {
