@@ -1,5 +1,5 @@
 resource "aws_instance" "web" {
-  ami                         = "ami-064673ca419016c37"
+  ami                         = "ami-0aebfbd76fb69a16b"
   associate_public_ip_address = true
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public.id
@@ -7,12 +7,16 @@ resource "aws_instance" "web" {
   root_block_device {
     delete_on_termination = true
     volume_size           = 10
-    volume_type           = "gp3"
+    volume_type           = "gp2"
   }
 
   tags = merge(local.common_tags, {
-    Name = "ec2"
+    Name = "ec2-nginx"
   })
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
 }
 
@@ -40,6 +44,15 @@ resource "aws_vpc_security_group_ingress_rule" "https" {
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 443
   to_port           = 443
+  ip_protocol       = "tcp"
+
+}
+
+resource "aws_vpc_security_group_ingress_rule" "SSH" {
+  security_group_id = aws_security_group.public_http_traffic.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 22
+  to_port           = 22
   ip_protocol       = "tcp"
 
 }
